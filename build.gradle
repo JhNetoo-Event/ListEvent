@@ -1,39 +1,32 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '8.1.1' // Use uma versão recente
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'java'
 }
 
 group = 'org.crystalocean'
-version = '1.0'
+version = '1.0.0'
+
+def targetJavaVersion = 17
 
 repositories {
     mavenCentral()
     maven { url = 'https://repo.purpurmc.org/snapshots' }
-    maven { url = "https://repo.papermc.io/repository/maven-public/" }
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
 }
 
 dependencies {
     compileOnly("org.purpurmc.purpur:purpur-api:1.20.1-R0.1-SNAPSHOT")
-    implementation 'com.zaxxer:HikariCP:5.1.0'
-    implementation("mysql:mysql-connector-java:8.0.33")
+    implementation("com.google.code.gson:gson:2.10.1")
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
-}
-
-// Define o Java Target para 17
-def targetJavaVersion = 17
-
-java {
-    // Configura a versão do Java para compilação
+    toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
     sourceCompatibility = JavaVersion.toVersion(targetJavaVersion)
     targetCompatibility = JavaVersion.toVersion(targetJavaVersion)
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    // Usa a flag release para garantir compatibilidade (importante se não usar toolchain)
     if (targetJavaVersion >= 9) {
         options.release.set(targetJavaVersion)
     }
@@ -43,35 +36,20 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         include '**/*'
     }
-
     filesMatching('plugin.yml') {
-        expand('version': project.version) // Expande a versão definida acima
+        expand('version': project.version)
     }
-
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-// Configuração do Shadow JAR
 shadowJar {
-    // Realoca pacotes para evitar conflitos
-    relocate 'com.zaxxer.hikari', 'org.crystalocean.CTrabalhos.lib.hikari'
-    relocate 'com.mysql.cj', 'org.crystalocean.CTrabalhos.lib.mysql'
-    relocate 'com.tchristofferson.configupdater', 'org.crystalocean.CTrabalhos.lib.configupdater'
-    relocate 'okhttp3', 'org.crystalocean.CTrabalhos.lib.okhttp3'
-    relocate 'okio', 'org.crystalocean.CTrabalhos.lib.okio'
-    relocate 'org.bstats', 'org.crystalocean.CTrabalhos.lib.bstats'
-
-
-    // Remove o sufixo '-shadow' do nome do arquivo final
     archiveClassifier.set('')
 }
 
-// Garante que 'build' gere o JAR sombreado
 build {
     dependsOn shadowJar
 }
 
-// Desabilita o JAR fino padrão
 jar {
     enabled = false
 }

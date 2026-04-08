@@ -1,9 +1,20 @@
 name: ListEvent
-description: Plugin de lista evento do JhNetoo
-version: '$version'
-
-main: org.crystalocean.listEvent.ListEvent
+version: '${version}'
+main: org.crystalocean.listEvent.ListEventPlugin
 api-version: '1.20'
 load: STARTUP
-
-authors: [ CrystalOcean ]
+authors: [CrystalOcean]
+description: Allowlist segura em JSON para Purpur/Paper.
+website: https://github.com/JhNetoo-Event/ListEvent
+commands:
+  plist:
+    description: Gerencia a allowlist privada do servidor.
+    usage: /plist <add|remove|list|info|reload|on|off>
+    permission: listevent.admin
+permissions:
+  listevent.admin:
+    description: Permite gerenciar a allowlist privada.
+    default: op
+  listevent.view:
+    description: Permite visualizar a allowlist privada.
+    default: op

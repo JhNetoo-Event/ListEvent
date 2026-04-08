@@ -1,0 +1,17 @@
+enabled: true
+
+kick-message: "&cVoce nao esta autorizado a entrar neste servidor."
+
+storage:
+  file-name: "allowed-players.json"
+  pretty-print: true
+  backup-on-save: true
+
+behavior:
+  log-joins-denied: true
+  update-name-on-join: true
+  allow-ops-bypass: true
+  persist-removals-as-inactive: true
+
+messages:
+  prefix: "&8[&bListEvent&8] &7"
