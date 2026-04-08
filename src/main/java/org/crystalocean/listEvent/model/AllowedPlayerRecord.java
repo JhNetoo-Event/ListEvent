@@ -13,6 +13,7 @@ public class AllowedPlayerRecord {
     private Instant updatedAt;
     private boolean active;
 
+    @SuppressWarnings("unused")
     public AllowedPlayerRecord() {
     }
 
@@ -31,10 +32,6 @@ public class AllowedPlayerRecord {
         return uuid;
     }
 
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
-
     public String getLastKnownName() {
         return lastKnownName;
     }
@@ -47,25 +44,27 @@ public class AllowedPlayerRecord {
         return addedBy;
     }
 
-    public void setAddedBy(String addedBy) {
-        this.addedBy = addedBy;
-    }
-
     public String getNote() {
         return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
     }
 
     public Instant getAddedAt() {
         return addedAt;
     }
 
-    public void setAddedAt(Instant addedAt) {
-        this.addedAt = addedAt;
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 
-    public Instant getUpdatedAt() {
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
     }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+}

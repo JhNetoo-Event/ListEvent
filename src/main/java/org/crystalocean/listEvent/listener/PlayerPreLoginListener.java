@@ -21,6 +21,7 @@ public class PlayerPreLoginListener implements Listener {
     }
 
     @EventHandler
+    @SuppressWarnings("unused")
     public void onAsyncPreLogin(AsyncPlayerPreLoginEvent event) {
         UUID uuid = event.getUniqueId();
         String name = event.getName();

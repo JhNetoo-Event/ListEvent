@@ -59,10 +59,6 @@ public final class ListEventPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerPreLoginListener(this, allowlistService), this);
     }
 
-    public @NotNull AllowlistService getAllowlistService() {
-        return allowlistService;
-    }
-
     public @NotNull AuditLogger getAuditLogger() {
         return auditLogger;
     }
