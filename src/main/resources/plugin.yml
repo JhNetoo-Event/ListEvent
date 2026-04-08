@@ -1,0 +1,9 @@
+name: ListEvent
+description: Plugin de lista evento do JhNetoo
+version: '$version'
+
+main: org.crystalocean.listEvent.ListEvent
+api-version: '1.20'
+load: STARTUP
+
+authors: [ CrystalOcean ]
