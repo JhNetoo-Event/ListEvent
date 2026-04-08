@@ -68,4 +68,18 @@ public class AllowedPlayerRecord {
     }
 
     public Instant getUpdatedAt() {
+        return updatedAt;
     }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+}

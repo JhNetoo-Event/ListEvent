@@ -84,4 +84,114 @@ public class AllowlistService {
                         actor.getName(),
                         note,
                         now,
+                        now,
+                        true
+                ));
+
+        if (repository.findByUuid(resolved.uuid()).isPresent() && record.isActive()) {
+            return AddResult.alreadyAdded(resolved.name());
+        }
+
+        record.setActive(true);
+        record.setUpdatedAt(now);
+
+        repository.saveRecord(record);
+        auditLogger.log(actor.getName() + " adicionou " + resolved.name() + " (" + resolved.uuid() + ") à allowlist. Nota: " + note);
+
+        return AddResult.success(resolved.name(), resolved.uuid());
     }
+
+    public RemoveResult removePlayer(String target, CommandSender actor) {
+        Optional<AllowedPlayerRecord> optionalRecord = getInfo(target);
+        if (optionalRecord.isEmpty() || !optionalRecord.get().isActive()) {
+            return RemoveResult.notFound(target);
+        }
+
+        AllowedPlayerRecord record = optionalRecord.get();
+        if (plugin.getConfig().getBoolean("behavior.persist-removals-as-inactive", true)) {
+            record.setActive(false);
+            record.setUpdatedAt(Instant.now());
+            repository.saveRecord(record);
+        } else {
+            repository.deleteRecord(record.getUuid());
+        }
+
+        auditLogger.log(actor.getName() + " removeu " + record.getLastKnownName() + " (" + record.getUuid() + ") da allowlist.");
+
+        Player player = Bukkit.getPlayer(record.getUuid());
+        if (player != null && player.isOnline()) {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                player.kick(org.crystalocean.listEvent.util.MessageUtil.toComponent(getKickMessage()));
+            });
+        }
+
+        return RemoveResult.success(record.getLastKnownName());
+    }
+
+    public String getKickMessage() {
+        return plugin.getConfig().getString("kick-message", "&cVoce nao esta autorizado a entrar neste servidor.");
+    }
+
+    private ResolvedPlayer resolvePlayer(String target) {
+        Optional<UUID> uuidOpt = parseUuid(target);
+        if (uuidOpt.isPresent()) {
+            UUID uuid = uuidOpt.get();
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+            String name = offlinePlayer.getName() != null ? offlinePlayer.getName() : target;
+            return new ResolvedPlayer(uuid, name);
+        }
+
+        Player player = Bukkit.getPlayerExact(target);
+        if (player != null) {
+            return new ResolvedPlayer(player.getUniqueId(), player.getName());
+        }
+
+        PlayerProfile profile = Bukkit.createProfile(target);
+        try {
+            profile.complete(true);
+            if (profile.getId() != null) {
+                return new ResolvedPlayer(profile.getId(), profile.getName());
+            }
+        } catch (Exception e) {
+             plugin.getLogger().warning("Failed to resolve profile for " + target);
+        }
+
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(target);
+        if (offlinePlayer.hasPlayedBefore() || offlinePlayer.isOnline()) {
+             return new ResolvedPlayer(offlinePlayer.getUniqueId(), target);
+        }
+
+        return null;
+    }
+
+    private Optional<UUID> parseUuid(String uuidStr) {
+        try {
+            return Optional.of(UUID.fromString(uuidStr));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
+
+    public record ResolvedPlayer(UUID uuid, String name) {}
+
+    public record AddResult(boolean success, boolean alreadyAdded, String name, UUID uuid) {
+        public static AddResult success(String name, UUID uuid) {
+            return new AddResult(true, false, name, uuid);
+        }
+        public static AddResult alreadyAdded(String name) {
+            return new AddResult(false, true, name, null);
+        }
+        public static AddResult notFound(String name) {
+            return new AddResult(false, false, name, null);
+        }
+    }
+
+    public record RemoveResult(boolean success, String name) {
+        public static RemoveResult success(String name) {
+            return new RemoveResult(true, name);
+        }
+        public static RemoveResult notFound(String name) {
+            return new RemoveResult(false, name);
+        }
+    }
+}

@@ -78,4 +78,50 @@ public class AllowlistRepository {
             AllowlistData data = new AllowlistData();
             data.setPlayers(new ArrayList<>(records.values()));
 
+            try (Writer writer = Files.newBufferedWriter(file)) {
+                gson.toJson(data, writer);
+            }
+        } catch (IOException e) {
+            plugin.getLogger().severe("Falha ao salvar allowlist JSON: " + e.getMessage());
         }
+    }
+
+    public boolean isAllowed(UUID uuid) {
+        AllowedPlayerRecord record = records.get(uuid);
+        return record != null && record.isActive();
+    }
+
+    public Optional<AllowedPlayerRecord> findByUuid(UUID uuid) {
+        return Optional.ofNullable(records.get(uuid));
+    }
+
+    public Optional<AllowedPlayerRecord> findByName(String name) {
+        return records.values().stream()
+                .filter(record -> record.getLastKnownName() != null && record.getLastKnownName().equalsIgnoreCase(name))
+                .findFirst();
+    }
+
+    public void updateLastKnownName(UUID uuid, String name) {
+        AllowedPlayerRecord record = records.get(uuid);
+        if (record != null && (record.getLastKnownName() == null || !record.getLastKnownName().equals(name))) {
+            record.setLastKnownName(name);
+            record.setUpdatedAt(Instant.now());
+        }
+    }
+
+    public Collection<AllowedPlayerRecord> getAllSorted() {
+        return records.values().stream()
+                .sorted(Comparator.comparing(AllowedPlayerRecord::getAddedAt))
+                .toList();
+    }
+
+    public void saveRecord(AllowedPlayerRecord record) {
+        records.put(record.getUuid(), record);
+        save();
+    }
+
+    public void deleteRecord(UUID uuid) {
+        records.remove(uuid);
+        save();
+    }
+}

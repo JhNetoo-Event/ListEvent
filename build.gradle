@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'com.gradleup.shadow' version '8.3.6'
     id 'java'
 }
 
@@ -33,11 +33,13 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 processResources {
+    def props = [version: project.version]
+    inputs.properties props
     from(sourceSets.main.resources.srcDirs) {
         include '**/*'
     }
     filesMatching('plugin.yml') {
-        expand('version': project.version)
+        expand props
     }
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
