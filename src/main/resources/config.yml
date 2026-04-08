@@ -12,6 +12,9 @@ behavior:
   update-name-on-join: true
   allow-ops-bypass: true
   persist-removals-as-inactive: true
+  allowed-permissions:
+    - "evento.vip"
+    - "evento.staff"
 
 messages:
   prefix: "&8[&bListEvent&8] &7"

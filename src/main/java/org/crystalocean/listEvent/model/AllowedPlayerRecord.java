@@ -12,13 +12,19 @@ public class AllowedPlayerRecord {
     private Instant addedAt;
     private Instant updatedAt;
     private boolean active;
+    private Instant expiresAt;
+    private String reason;
+    private String removedBy;
+    private Instant removedAt;
+    private Instant lastJoinAt;
 
     @SuppressWarnings("unused")
     public AllowedPlayerRecord() {
     }
 
     public AllowedPlayerRecord(UUID uuid, String lastKnownName, String addedBy, String note,
-                               Instant addedAt, Instant updatedAt, boolean active) {
+                               Instant addedAt, Instant updatedAt, boolean active,
+                               Instant expiresAt, String reason) {
         this.uuid = uuid;
         this.lastKnownName = lastKnownName;
         this.addedBy = addedBy;
@@ -26,6 +32,8 @@ public class AllowedPlayerRecord {
         this.addedAt = addedAt;
         this.updatedAt = updatedAt;
         this.active = active;
+        this.expiresAt = expiresAt;
+        this.reason = reason;
     }
 
     public UUID getUuid() {
@@ -66,5 +74,45 @@ public class AllowedPlayerRecord {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public Instant getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(Instant expiresAt) {
+        this.expiresAt = expiresAt;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getRemovedBy() {
+        return removedBy;
+    }
+
+    public void setRemovedBy(String removedBy) {
+        this.removedBy = removedBy;
+    }
+
+    public Instant getRemovedAt() {
+        return removedAt;
+    }
+
+    public void setRemovedAt(Instant removedAt) {
+        this.removedAt = removedAt;
+    }
+
+    public Instant getLastJoinAt() {
+        return lastJoinAt;
+    }
+
+    public void setLastJoinAt(Instant lastJoinAt) {
+        this.lastJoinAt = lastJoinAt;
     }
 }

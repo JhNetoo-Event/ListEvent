@@ -37,22 +37,17 @@ public class AllowlistService {
         auditLogger.log("Sistema " + (enabled ? "ativado" : "desativado"));
     }
 
-    public boolean canJoin(UUID uuid, String name) {
+    public boolean isAllowedInCache(UUID uuid, String name) {
         if (!isPluginEnabled()) {
             return true;
         }
 
         if (repository.isAllowed(uuid)) {
+            repository.updateLastJoin(uuid);
             if (plugin.getConfig().getBoolean("behavior.update-name-on-join", true) && name != null && !name.isBlank()) {
                 repository.updateLastKnownName(uuid, name);
-                repository.save();
             }
             return true;
-        }
-
-        if (plugin.getConfig().getBoolean("behavior.allow-ops-bypass", true)) {
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-            return offlinePlayer.isOp();
         }
 
         return false;
@@ -70,35 +65,64 @@ public class AllowlistService {
         return repository.getAllSorted();
     }
 
-    public AddResult addPlayer(String target, String note, CommandSender actor) {
+    public AddResult addPlayer(String target, String note, Instant expiresAt, CommandSender actor) {
         ResolvedPlayer resolved = resolvePlayer(target);
         if (resolved == null) {
             return AddResult.notFound(target);
         }
 
         Instant now = Instant.now();
-        AllowedPlayerRecord record = repository.findByUuid(resolved.uuid())
-                .orElseGet(() -> new AllowedPlayerRecord(
-                        resolved.uuid(),
-                        resolved.name(),
-                        actor.getName(),
-                        note,
-                        now,
-                        now,
-                        true
-                ));
+        Optional<AllowedPlayerRecord> existingOpt = repository.findByUuid(resolved.uuid());
 
-        if (repository.findByUuid(resolved.uuid()).isPresent() && record.isActive()) {
+        if (existingOpt.isPresent() && existingOpt.get().isActive()) {
             return AddResult.alreadyAdded(resolved.name());
         }
 
+        AllowedPlayerRecord record = existingOpt.orElseGet(() -> new AllowedPlayerRecord(
+                resolved.uuid(),
+                resolved.name(),
+                actor.getName(),
+                note,
+                now,
+                now,
+                true,
+                expiresAt,
+                null
+        ));
+
         record.setActive(true);
         record.setUpdatedAt(now);
+        record.setExpiresAt(expiresAt);
+        record.setReason(null);
+        record.setRemovedAt(null);
+        record.setRemovedBy(null);
 
         repository.saveRecord(record);
-        auditLogger.log(actor.getName() + " adicionou " + resolved.name() + " (" + resolved.uuid() + ") à allowlist. Nota: " + note);
+        auditLogger.log(actor.getName() + " adicionou " + resolved.name() + " (" + resolved.uuid() + ") à allowlist. Nota: " + note + (expiresAt != null ? " (Expira em: " + expiresAt + ")" : ""));
 
         return AddResult.success(resolved.name(), resolved.uuid());
+    }
+
+    public RemoveResult extendPlayer(String target, long timeMs, CommandSender actor) {
+        Optional<AllowedPlayerRecord> optionalRecord = getInfo(target);
+        if (optionalRecord.isEmpty()) {
+            return RemoveResult.notFound(target);
+        }
+
+        AllowedPlayerRecord record = optionalRecord.get();
+        Instant currentExpiration = (record.getExpiresAt() != null && record.getExpiresAt().isAfter(Instant.now()))
+                ? record.getExpiresAt()
+                : Instant.now();
+
+        record.setExpiresAt(currentExpiration.plusMillis(timeMs));
+        record.setActive(true);
+        record.setReason(null);
+        record.setRemovedAt(null);
+        record.setRemovedBy(null);
+        record.setUpdatedAt(Instant.now());
+        repository.saveRecord(record);
+        auditLogger.log(actor.getName() + " estendeu o tempo de " + record.getLastKnownName() + " (" + record.getUuid() + ") na allowlist.");
+        return RemoveResult.success(record.getLastKnownName());
     }
 
     public RemoveResult removePlayer(String target, CommandSender actor) {
@@ -111,6 +135,9 @@ public class AllowlistService {
         if (plugin.getConfig().getBoolean("behavior.persist-removals-as-inactive", true)) {
             record.setActive(false);
             record.setUpdatedAt(Instant.now());
+            record.setRemovedAt(Instant.now());
+            record.setRemovedBy(actor.getName());
+            record.setReason("Removido manualmente");
             repository.saveRecord(record);
         } else {
             repository.deleteRecord(record.getUuid());

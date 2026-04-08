@@ -10,7 +10,6 @@ commands:
   plist:
     description: Gerencia a allowlist privada do servidor.
     usage: /plist <add|remove|list|info|reload|on|off>
-    permission: listevent.admin
 permissions:
   listevent.admin:
     description: Permite gerenciar a allowlist privada.

@@ -27,6 +27,7 @@ public class AllowlistRepository {
     private final Gson gson;
     private final Path file;
     private final Map<UUID, AllowedPlayerRecord> records = new ConcurrentHashMap<>();
+    private volatile boolean dirty = false;
 
     public AllowlistRepository(ListEventPlugin plugin) {
         this.plugin = plugin;
@@ -67,6 +68,10 @@ public class AllowlistRepository {
     }
 
     public synchronized void save() {
+        if (!dirty && Files.exists(file)) {
+            return;
+        }
+
         try {
             Files.createDirectories(file.getParent());
 
@@ -78,9 +83,13 @@ public class AllowlistRepository {
             AllowlistData data = new AllowlistData();
             data.setPlayers(new ArrayList<>(records.values()));
 
-            try (Writer writer = Files.newBufferedWriter(file)) {
+            Path tempFile = file.resolveSibling(file.getFileName() + ".tmp");
+            try (Writer writer = Files.newBufferedWriter(tempFile)) {
                 gson.toJson(data, writer);
             }
+
+            Files.move(tempFile, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            dirty = false;
         } catch (IOException e) {
             plugin.getLogger().severe("Falha ao salvar allowlist JSON: " + e.getMessage());
         }
@@ -88,7 +97,18 @@ public class AllowlistRepository {
 
     public boolean isAllowed(UUID uuid) {
         AllowedPlayerRecord record = records.get(uuid);
-        return record != null && record.isActive();
+        if (record != null && record.isActive()) {
+            if (record.getExpiresAt() != null && Instant.now().isAfter(record.getExpiresAt())) {
+                record.setActive(false);
+                record.setReason("Expirado");
+                record.setRemovedAt(Instant.now());
+                record.setRemovedBy("Sistema");
+                markDirty();
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     public Optional<AllowedPlayerRecord> findByUuid(UUID uuid) {
@@ -106,6 +126,15 @@ public class AllowlistRepository {
         if (record != null && (record.getLastKnownName() == null || !record.getLastKnownName().equals(name))) {
             record.setLastKnownName(name);
             record.setUpdatedAt(Instant.now());
+            markDirty();
+        }
+    }
+
+    public void updateLastJoin(UUID uuid) {
+        AllowedPlayerRecord record = records.get(uuid);
+        if (record != null) {
+            record.setLastJoinAt(Instant.now());
+            markDirty();
         }
     }
 
@@ -117,11 +146,15 @@ public class AllowlistRepository {
 
     public void saveRecord(AllowedPlayerRecord record) {
         records.put(record.getUuid(), record);
-        save();
+        markDirty();
     }
 
     public void deleteRecord(UUID uuid) {
         records.remove(uuid);
-        save();
+        markDirty();
+    }
+
+    public void markDirty() {
+        this.dirty = true;
     }
 }

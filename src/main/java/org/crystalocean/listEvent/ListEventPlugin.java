@@ -28,6 +28,12 @@ public final class ListEventPlugin extends JavaPlugin {
         registerCommands();
         registerListeners();
 
+        getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+            if (repository != null) {
+                repository.save();
+            }
+        }, 20L * 60L, 20L * 60L); // flush every 60 seconds
+
         getLogger().info("ListEvent habilitado com sucesso.");
     }
 
@@ -41,7 +47,19 @@ public final class ListEventPlugin extends JavaPlugin {
 
     public void reloadPlugin() {
         reloadConfig();
-        repository.load();
+        if (repository != null) {
+            repository.save();
+        }
+        this.repository = new AllowlistRepository(this);
+        this.repository.load();
+        this.allowlistService = new AllowlistService(this, repository, auditLogger);
+
+        PluginCommand command = getCommand("plist");
+        if (command != null) {
+            AllowlistCommand executor = new AllowlistCommand(this, allowlistService);
+            command.setExecutor(executor);
+            command.setTabCompleter(executor);
+        }
     }
 
     private void registerCommands() {
@@ -56,7 +74,11 @@ public final class ListEventPlugin extends JavaPlugin {
     }
 
     private void registerListeners() {
-        getServer().getPluginManager().registerEvents(new PlayerPreLoginListener(this, allowlistService), this);
+        getServer().getPluginManager().registerEvents(new PlayerPreLoginListener(this), this);
+    }
+
+    public @NotNull AllowlistService getAllowlistService() {
+        return allowlistService;
     }
 
     public @NotNull AuditLogger getAuditLogger() {
