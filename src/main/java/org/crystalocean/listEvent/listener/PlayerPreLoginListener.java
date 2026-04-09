@@ -78,6 +78,11 @@ public class PlayerPreLoginListener implements Listener {
         }
 
         Component kickMessage = MessageUtil.toComponent(plugin.getAllowlistService().getKickMessage());
-        event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, kickMessage);
+        try {
+            event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, kickMessage);
+        } catch (NoSuchMethodError e) {
+            // Fallback for older Bukkit/Mohist instances that lack Adventure support in events
+            event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, MessageUtil.toLegacyText(kickMessage));
+        }
     }
 }

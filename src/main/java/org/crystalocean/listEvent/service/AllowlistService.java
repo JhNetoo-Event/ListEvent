@@ -173,16 +173,6 @@ public class AllowlistService {
             return new ResolvedPlayer(player.getUniqueId(), player.getName());
         }
 
-        PlayerProfile profile = Bukkit.createProfile(target);
-        try {
-            profile.complete(true);
-            if (profile.getId() != null) {
-                return new ResolvedPlayer(profile.getId(), profile.getName());
-            }
-        } catch (Exception e) {
-            plugin.getLogger().warning("Falha ao resolver o perfil para " + target);
-        }
-
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(target);
         if (offlinePlayer.hasPlayedBefore() || offlinePlayer.isOnline()) {
             return new ResolvedPlayer(offlinePlayer.getUniqueId(), target);
