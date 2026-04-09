@@ -49,8 +49,8 @@ public final class MessageUtil {
         }
     }
 
-    public static String toLegacyText(Component component) {
-        if (component == null) return "";
-        return LEGACY_SERIALIZER.serialize(component);
+    public static String toLegacyText(String text) {
+        if (text == null) return "";
+        return org.bukkit.ChatColor.translateAlternateColorCodes('&', text);
     }
 }

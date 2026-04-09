@@ -145,13 +145,6 @@ public class AllowlistService {
 
         auditLogger.log(actor.getName() + " removeu " + record.getLastKnownName() + " (" + record.getUuid() + ") da allowlist.");
 
-        Player player = Bukkit.getPlayer(record.getUuid());
-        if (player != null && player.isOnline()) {
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                player.kick(org.crystalocean.listEvent.util.MessageUtil.toComponent(getKickMessage()));
-            });
-        }
-
         return RemoveResult.success(record.getLastKnownName());
     }
 
