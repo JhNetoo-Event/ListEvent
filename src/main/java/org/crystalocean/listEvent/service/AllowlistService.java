@@ -167,11 +167,7 @@ public class AllowlistService {
         }
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(target);
-        if (offlinePlayer.hasPlayedBefore() || offlinePlayer.isOnline()) {
-            return new ResolvedPlayer(offlinePlayer.getUniqueId(), target);
-        }
-
-        return null;
+        return new ResolvedPlayer(offlinePlayer.getUniqueId(), target);
     }
 
     private Optional<UUID> parseUuid(String uuidStr) {

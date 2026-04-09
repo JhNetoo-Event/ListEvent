@@ -77,7 +77,7 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (args.length < 2) {
-            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist add <jogador/uuid> [tempo] [nota]"));
+            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist add (jogador/uuid) [tempo] [nota]"));
             return;
         }
         String target = args[1];
@@ -112,7 +112,7 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (args.length < 3) {
-            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist extend <jogador/uuid> <tempo>"));
+            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist extend (jogador/uuid) (tempo)"));
             return;
         }
         String target = args[1];
@@ -136,7 +136,7 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (args.length < 2) {
-            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist remove <jogador/uuid>"));
+            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist remove (jogador/uuid)"));
             return;
         }
         String target = args[1];
@@ -196,7 +196,7 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
 
     private void handleSearch(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist search <texto>"));
+            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist search (texto)"));
             return;
         }
         String text = args[1].toLowerCase(Locale.ROOT);
@@ -253,7 +253,7 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (args.length < 2) {
-            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist import <arquivo.txt>"));
+            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist import (arquivo.txt)"));
             return;
         }
 
@@ -296,7 +296,7 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (args.length < 2) {
-            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist export <arquivo.txt>"));
+            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist export (arquivo.txt)"));
             return;
         }
 
@@ -326,7 +326,7 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
 
     private void handleHistory(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist history <jogador/uuid>"));
+            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist history (jogador/uuid)"));
             return;
         }
         String target = args[1];
@@ -349,7 +349,7 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
 
     private void handleInfo(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist info <jogador/uuid>"));
+            sender.sendMessage(MessageUtil.toComponent(prefix() + "&cUso: /plist info (jogador/uuid)"));
             return;
         }
         String target = args[1];
@@ -395,16 +395,16 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
 
     private void sendHelp(CommandSender sender, String label) {
         sender.sendMessage(MessageUtil.toComponent(prefix() + "&aComandos disponiveis:"));
-        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " add <jogador/uuid> [tempo] [nota]"));
-        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " remove <jogador/uuid>"));
-        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " extend <jogador/uuid> <tempo>"));
+        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " add (jogador/uuid) [tempo] [nota]"));
+        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " remove (jogador/uuid)"));
+        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " extend (jogador/uuid) (tempo)"));
         sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " list [pagina]"));
         sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " expired"));
-        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " info <jogador/uuid>"));
-        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " history <jogador/uuid>"));
-        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " search <texto>"));
+        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " info (jogador/uuid)"));
+        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " history (jogador/uuid)"));
+        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " search (texto)"));
         sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " active|inactive [pagina]"));
-        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " import|export <arquivo>"));
+        sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " import|export (arquivo)"));
         sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " reload"));
         sender.sendMessage(MessageUtil.toComponent(" &8- &f/" + label + " on|off"));
     }
