@@ -53,14 +53,37 @@ public class AllowlistRepository {
                     return;
                 }
 
+                boolean manualEditDetected = false;
                 for (AllowedPlayerRecord record : data.getPlayers()) {
                     if (record != null && record.getUuid() != null) {
                         if (record.getUpdatedAt() == null) {
                             record.setUpdatedAt(record.getAddedAt() == null ? Instant.now() : record.getAddedAt());
                         }
                         records.put(record.getUuid(), record);
+                    } else {
+                        manualEditDetected = true;
                     }
                 }
+
+                if (manualEditDetected) {
+                    plugin.getLogger().warning("AVISO: Edicao manual incorreta detectada no arquivo allowed-players.json.");
+                    plugin.getLogger().warning("Por favor, use os comandos /plist add ou /plist import. Registros mal formatados foram ignorados.");
+                }
+            }
+        } catch (com.google.gson.JsonSyntaxException e) {
+            plugin.getLogger().severe("=====================================================");
+            plugin.getLogger().severe("ERRO FATAL: O arquivo allowed-players.json esta corrompido!");
+            plugin.getLogger().severe("Isso ocorre por edicao manual incorreta (ex: falta de aspas, chaves).");
+            plugin.getLogger().severe("O plugin NAO vai carregar essa lista quebrada. Use comandos.");
+            plugin.getLogger().severe("=====================================================");
+
+            try {
+                Path broken = file.resolveSibling(file.getFileName() + ".broken");
+                Files.move(file, broken, StandardCopyOption.REPLACE_EXISTING);
+                plugin.getLogger().warning("Arquivo corrompido movido para " + broken.getFileName() + ". Uma nova lista vazia sera criada.");
+                save();
+            } catch (IOException ioException) {
+                plugin.getLogger().severe("Falha ao mover arquivo corrompido: " + ioException.getMessage());
             }
         } catch (Exception e) {
             plugin.getLogger().severe("Falha ao carregar allowlist JSON: " + e.getMessage());
