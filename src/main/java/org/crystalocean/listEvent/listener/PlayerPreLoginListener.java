@@ -13,6 +13,7 @@ import org.crystalocean.listEvent.ListEventPlugin;
 import org.crystalocean.listEvent.service.AllowlistService;
 import org.crystalocean.listEvent.util.MessageUtil;
 
+import java.lang.reflect.Method;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +23,8 @@ public class PlayerPreLoginListener implements Listener {
     private final Cache<UUID, Boolean> pendingChecks = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build();
+    private static Method componentDisallowMethod = null;
+    private static boolean checkedMethod = false;
 
     public PlayerPreLoginListener(ListEventPlugin plugin) {
         this.plugin = plugin;
@@ -78,11 +81,23 @@ public class PlayerPreLoginListener implements Listener {
         }
 
         String rawKickMessage = plugin.getAllowlistService().getKickMessage();
-        try {
-            event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, MessageUtil.toComponent(rawKickMessage));
-        } catch (NoSuchMethodError e) {
-            // Fallback for older Bukkit/Mohist instances that lack Adventure support in events
-            event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, MessageUtil.toLegacyText(rawKickMessage));
+
+        if (!checkedMethod) {
+            try {
+                componentDisallowMethod = PlayerLoginEvent.class.getMethod("disallow", PlayerLoginEvent.Result.class, Component.class);
+            } catch (NoSuchMethodException ignored) {
+            }
+            checkedMethod = true;
         }
+
+        if (componentDisallowMethod != null) {
+            try {
+                componentDisallowMethod.invoke(event, PlayerLoginEvent.Result.KICK_WHITELIST, MessageUtil.toComponent(rawKickMessage));
+                return;
+            } catch (Exception ignored) {
+            }
+        }
+
+        event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, MessageUtil.toLegacyText(rawKickMessage));
     }
 }
