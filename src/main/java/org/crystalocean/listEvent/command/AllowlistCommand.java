@@ -431,6 +431,18 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
                     .filter(name -> name != null && name.toLowerCase().startsWith(args[1].toLowerCase()))
                     .collect(Collectors.toList());
         }
+        if (args.length == 2 && args[0].equalsIgnoreCase("import")) {
+            java.io.File folder = plugin.getDataFolder();
+            if (folder.exists() && folder.isDirectory()) {
+                String prefix = args[1].toLowerCase();
+                java.io.File[] files = folder.listFiles((dir, name) -> name.toLowerCase().startsWith(prefix) && (name.endsWith(".txt") || name.endsWith(".csv")));
+                if (files != null) {
+                    return java.util.Arrays.stream(files)
+                            .map(java.io.File::getName)
+                            .collect(Collectors.toList());
+                }
+            }
+        }
         return List.of();
     }
 }
