@@ -1,20 +1,19 @@
-enabled: true
-
-kick-message: "&cVoce nao esta autorizado a entrar neste servidor."
-
-storage:
-  file-name: "allowed-players.json"
-  pretty-print: true
-  backup-on-save: true
-
-behavior:
-  log-joins-denied: true
-  update-name-on-join: true
-  allow-ops-bypass: true
-  persist-removals-as-inactive: true
-  allowed-permissions:
-    - "evento.vip"
-    - "evento.staff"
-
-messages:
-  prefix: "&8[&bListEvent&8] &7"
+name: ListEvent
+version: '${version}'
+main: org.crystalocean.listEvent.ListEventPlugin
+api-version: '1.20'
+load: STARTUP
+authors: [CrystalOcean]
+description: Allowlist segura em JSON para Purpur/Paper.
+website: https://github.com/JhNetoo-Event/ListEvent
+commands:
+  plist:
+    description: Gerencia a allowlist privada do servidor.
+    usage: /plist <add|remove|list|info|reload|on|off>
+permissions:
+  listevent.admin:
+    description: Permite gerenciar a allowlist privada.
+    default: op
+  listevent.view:
+    description: Permite visualizar a allowlist privada.
+    default: op

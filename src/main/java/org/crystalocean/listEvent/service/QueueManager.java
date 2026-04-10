@@ -166,10 +166,6 @@ public class QueueManager {
         return -1;
     }
 
-    public int getSize() {
-        return activeEntries.size();
-    }
-
     public List<QueueEntry> getOrderedEntries() {
         List<QueueEntry> entries = new ArrayList<>(activeEntries.values());
         entries.sort(Comparator.naturalOrder());
@@ -261,6 +257,7 @@ public class QueueManager {
         dirty = false;
     }
 
+    @SuppressWarnings("unused")
     public synchronized void saveStateIfDirty() {
         if (!dirty) {
             return;

@@ -10,6 +10,7 @@ import org.crystalocean.listEvent.service.ProxyBridgeService;
 import org.crystalocean.listEvent.service.QueueManager;
 import org.crystalocean.listEvent.util.MessageUtil;
 
+@SuppressWarnings("unused")
 public class PlayerQueueListener implements Listener {
 
     private final QueueManager queueManager;

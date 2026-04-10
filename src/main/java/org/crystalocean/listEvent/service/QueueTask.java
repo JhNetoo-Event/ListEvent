@@ -8,6 +8,7 @@ import org.crystalocean.listEvent.util.MessageUtil;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class QueueTask implements Runnable {
 
     private final JavaPlugin plugin;
