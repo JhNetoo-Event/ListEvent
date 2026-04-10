@@ -23,15 +23,11 @@ public class PlayerPreLoginListener implements Listener {
     private final Cache<UUID, Boolean> pendingChecks = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build();
-    private static Method componentDisallowMethod = null;
-    private static boolean checkedMethod = false;
-
     public PlayerPreLoginListener(ListEventPlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    @SuppressWarnings("unused")
     public void onAsyncPreLogin(AsyncPlayerPreLoginEvent event) {
         UUID uuid = event.getUniqueId();
         String name = event.getName();
@@ -41,15 +37,19 @@ public class PlayerPreLoginListener implements Listener {
             return;
         }
 
+        // 1. Check if allowed in repository/cache
         if (allowlistService.isAllowedInCache(uuid, name)) {
             return;
         }
 
+        // Note: OP bypass and permissions cannot be checked reliably in AsyncPlayerPreLoginEvent 
+        // without a Player object. However, for a high-performance event server, 
+        // it's better to keep the allowlist as the primary source of truth.
+        // We will keep a small check in PlayerLoginEvent only for OPs/Permissions if enabled.
         pendingChecks.put(uuid, Boolean.TRUE);
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    @SuppressWarnings("unused")
     public void onPlayerLogin(PlayerLoginEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
@@ -62,10 +62,9 @@ public class PlayerPreLoginListener implements Listener {
             if (!allowlistService.isPluginEnabled() || allowlistService.isAllowedInCache(uuid, player.getName())) {
                 return;
             }
-        } else if (!needsCheck) {
-            return;
         }
 
+        // Bypass checks
         if (plugin.getConfig().getBoolean("behavior.allow-ops-bypass", true) && player.isOp()) {
             return;
         }
@@ -76,28 +75,12 @@ public class PlayerPreLoginListener implements Listener {
             }
         }
 
+        // Deny access
         if (plugin.getConfig().getBoolean("behavior.log-joins-denied", true)) {
             plugin.getAuditLogger().log("Entrada negada para " + player.getName() + " (" + uuid + ")");
         }
 
         String rawKickMessage = plugin.getAllowlistService().getKickMessage();
-
-        if (!checkedMethod) {
-            try {
-                componentDisallowMethod = PlayerLoginEvent.class.getMethod("disallow", PlayerLoginEvent.Result.class, Component.class);
-            } catch (NoSuchMethodException ignored) {
-            }
-            checkedMethod = true;
-        }
-
-        if (componentDisallowMethod != null) {
-            try {
-                componentDisallowMethod.invoke(event, PlayerLoginEvent.Result.KICK_WHITELIST, MessageUtil.toComponent(rawKickMessage));
-                return;
-            } catch (Exception ignored) {
-            }
-        }
-
-        event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, MessageUtil.toLegacyText(rawKickMessage));
+        event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, MessageUtil.toComponent(rawKickMessage));
     }
 }

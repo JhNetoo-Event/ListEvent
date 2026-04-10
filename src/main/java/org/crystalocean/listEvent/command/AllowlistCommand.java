@@ -29,10 +29,12 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
 
     private final ListEventPlugin plugin;
     private final AllowlistService allowlistService;
+    private String prefixCache;
 
     public AllowlistCommand(ListEventPlugin plugin, AllowlistService allowlistService) {
         this.plugin = plugin;
         this.allowlistService = allowlistService;
+        this.prefixCache = plugin.getConfig().getString("messages.prefix", "&8[&bListEvent&8] &7");
     }
 
     @Override
@@ -410,20 +412,23 @@ public class AllowlistCommand implements CommandExecutor, TabCompleter {
     }
 
     private String prefix() {
-        return plugin.getConfig().getString("messages.prefix", "&8[&bListEvent&8] &7");
+        return prefixCache;
     }
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            List<String> subs = new ArrayList<>();
+            java.util.Set<String> subs = new java.util.HashSet<>();
             if (sender.hasPermission("listevent.admin")) {
                 subs.addAll(List.of("add", "remove", "del", "extend", "expired", "history", "search", "active", "inactive", "import", "export", "reload", "on", "off"));
             }
             if (sender.hasPermission("listevent.view") || sender.hasPermission("listevent.admin")) {
                 subs.addAll(List.of("list", "info", "search", "active", "inactive"));
             }
-            return subs.stream().filter(s -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
+            return subs.stream()
+                    .filter(s -> s.startsWith(args[0].toLowerCase()))
+                    .sorted()
+                    .collect(Collectors.toList());
         }
         if (args.length == 2 && (args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("del") || args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("extend") || args[0].equalsIgnoreCase("history"))) {
             return allowlistService.listAll().stream()

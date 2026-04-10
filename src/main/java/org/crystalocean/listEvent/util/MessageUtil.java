@@ -36,13 +36,13 @@ public final class MessageUtil {
     }
 
     public static Component toComponent(String text) {
-        if (text == null) {
+        if (text == null || text.isEmpty()) {
             return Component.empty();
         }
 
         // If the text contains MiniMessage tags, use MiniMessage,
         // otherwise, we can parse legacy ampersand colors
-        if (text.contains("<") && text.contains(">")) {
+        if (text.contains("<") && (text.contains(">") || text.contains("/"))) {
             return MINI_MESSAGE.deserialize(text);
         } else {
             return LEGACY_SERIALIZER.deserialize(text);

@@ -88,6 +88,7 @@ public final class ListEventPlugin extends JavaPlugin {
             command.setExecutor(executor);
             command.setTabCompleter(executor);
         }
+        getLogger().info("Plugin recarregado com sucesso.");
 
         if (queueReleaseTask != null) {
             queueReleaseTask.cancel();

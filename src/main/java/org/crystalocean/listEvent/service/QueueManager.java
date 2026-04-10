@@ -185,14 +185,17 @@ public class QueueManager {
             return;
         }
 
+        List<QueueEntry> ordered = getOrderedEntries();
         String template = plugin.getConfig().getString("queue.messages.position-actionbar", "&eSua posição na fila: &b#%pos%");
-        for (QueueEntry entry : getOrderedEntries()) {
+        
+        for (int i = 0; i < ordered.size(); i++) {
+            QueueEntry entry = ordered.get(i);
             Player player = Bukkit.getPlayer(entry.uuid());
             if (player == null || !player.isOnline()) {
                 continue;
             }
 
-            int position = getPosition(entry.uuid());
+            int position = i + 1;
             String message = template
                     .replace("%pos%", String.valueOf(position))
                     .replace("%weight%", String.valueOf(entry.priorityWeight()));
