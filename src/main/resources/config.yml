@@ -18,3 +18,41 @@ behavior:
 
 messages:
   prefix: "&8[&bListEvent&8] &7"
+
+queue:
+  enabled: true
+  storage:
+    file-name: "queue-state.json"
+  # Nome EXATO do servidor no proxy (velocity.toml -> [servers]).
+  target-server: "principal"
+  proxy:
+    # VELOCITY sem plugin extra usa compatibilidade do canal BungeeCord no velocity.toml:
+    # advanced.bungee-plugin-message-channel = true
+    type: "VELOCITY"
+    messaging-channel: "BungeeCord"
+    # Se o proxy responder PlayerCount com outro nome, adicione aliases aqui.
+    target-server-aliases: []
+  reconnect-grace-seconds: 180
+  release-rate:
+    players-per-interval: 5
+    interval-seconds: 10
+  flow-control:
+    # Quando principal atingir este online, novos jogadores passam a entrar em fila.
+    activate-queue-at-online: 450
+    # Capacidade do servidor principal.
+    max-online: 500
+    # Slots de segurança para não lotar no limite.
+    reserve-slots: 5
+    # Se o playerCount do proxy estiver mais velho que isso, não libera lote.
+    player-count-max-age-seconds: 15
+  auto-open:
+    # Formato ISO local: YYYY-MM-DDTHH:mm:ss | Ex.: 2026-12-20T18:00:00
+    datetime: ""
+    zone: "UTC"
+  priority-permissions:
+    "listevent.priority.mvp": 100
+    "listevent.priority.vip": 50
+    "listevent.priority.default": 0
+  messages:
+    position-actionbar: "&eSua posição na fila: &b#%pos% &7(Prioridade: %weight%)"
+    connecting: "&aConectando ao servidor principal..."
