@@ -23,10 +23,10 @@ queue:
   enabled: true
   storage:
     file-name: "queue-state.json"
-  # Nome EXATO do servidor no proxy (velocity.toml -> [servers]).
+  # Nome exato do servidor no proxy (velocity.toml -> [servers]).
   target-server: "principal"
   proxy:
-    # VELOCITY sem plugin extra usa compatibilidade do canal BungeeCord no velocity.toml:
+    # Velocity sem plugin extra usa compatibilidade do canal BungeeCord no velocity.toml:
     # advanced.bungee-plugin-message-channel = true
     type: "VELOCITY"
     messaging-channel: "BungeeCord"
